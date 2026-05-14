@@ -104,22 +104,34 @@ impl CodeStore {
     }
 
     /// Search for code using multi-strategy FTS5 with fallback.
-    /// Strategy 1: OR + prefix on unicode61 FTS5 (best BM25 ranking)
-    /// Strategy 2: Trigram substring match on name column (fallback)
+    /// Strategy 1: AND + prefix on unicode61 FTS5 (most precise)
+    /// Strategy 2: OR + prefix on unicode61 FTS5 (broader recall)
+    /// Strategy 3: Trigram substring match on name column (fallback)
     pub fn search(&self, query: &str, top_k: usize) -> Result<Vec<SearchResult>> {
         let trimmed = query.trim();
         if trimmed.is_empty() {
             return Ok(vec![]);
         }
 
-        // Strategy 1: OR + prefix on unicode61 FTS5 (best ranking)
-        let fuzzy_query = Self::build_fuzzy_query(trimmed);
-        let results = self.search_fts(&fuzzy_query, top_k)?;
+        let (and_query, or_query) = Self::build_fuzzy_queries(trimmed);
+
+        if and_query.is_empty() {
+            return Ok(vec![]);
+        }
+
+        // Strategy 1: AND + prefix (precise — all terms must match)
+        let results = self.search_fts(&and_query, top_k)?;
         if !results.is_empty() {
             return Ok(results);
         }
 
-        // Strategy 2: Trigram substring match on name column
+        // Strategy 2: OR + prefix (broader — any term matches)
+        let results = self.search_fts(&or_query, top_k)?;
+        if !results.is_empty() {
+            return Ok(results);
+        }
+
+        // Strategy 3: Trigram substring match on name column
         if trimmed.len() >= 3 {
             let trigram_results = self.search_trigram(trimmed, top_k)?;
             if !trigram_results.is_empty() {
@@ -130,17 +142,31 @@ impl CodeStore {
         Ok(vec![])
     }
 
-    /// Build FTS5 query: OR + prefix for each token.
-    /// "auth middleware" → "\"auth\"* OR \"middleware\"*"
-    fn build_fuzzy_query(query: &str) -> String {
-        query
+    /// Build FTS5 query with multi-strategy: AND first (precise), then OR (broad).
+    /// Returns (and_query, or_query) pair.
+    /// "auth middleware" → ("auth* AND middleware*", "auth* OR middleware*")
+    fn build_fuzzy_queries(query: &str) -> (String, String) {
+        let tokens: Vec<String> = query
             .split_whitespace()
             .map(|token| {
-                let escaped = token.replace('"', "\"\"");
-                format!("\"{}\"*", escaped)
+                // Strip FTS5 special characters, keep only alphanumeric + underscore
+                let clean: String = token
+                    .chars()
+                    .filter(|c| c.is_alphanumeric() || *c == '_')
+                    .collect();
+                clean
             })
-            .collect::<Vec<_>>()
-            .join(" OR ")
+            .filter(|t| !t.is_empty())
+            .map(|t| format!("{}*", t))
+            .collect();
+
+        if tokens.is_empty() {
+            return (String::new(), String::new());
+        }
+
+        let and_query = tokens.join(" AND ");
+        let or_query = tokens.join(" OR ");
+        (and_query, or_query)
     }
 
     /// Search the primary unicode61 FTS5 table with BM25 name-boosted ranking.
