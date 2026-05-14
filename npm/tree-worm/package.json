@@ -1,6 +1,6 @@
 {
   "name": "tree-worm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A local code intelligence MCP server using Tree-sitter, SQLite FTS5, and Call Graphs",
   "license": "MIT",
   "repository": {
@@ -18,11 +18,11 @@
     "node": ">=18"
   },
   "optionalDependencies": {
-    "tree-worm-darwin-arm64": "0.0.1",
-    "tree-worm-darwin-x64": "0.0.1",
-    "tree-worm-linux-x64": "0.0.1",
-    "tree-worm-linux-arm64": "0.0.1",
-    "tree-worm-linux-x64-musl": "0.0.1",
-    "tree-worm-win32-x64": "0.0.1"
+    "tree-worm-darwin-arm64": "0.0.2",
+    "tree-worm-darwin-x64": "0.0.2",
+    "tree-worm-linux-x64": "0.0.2",
+    "tree-worm-linux-arm64": "0.0.2",
+    "tree-worm-linux-x64-musl": "0.0.2",
+    "tree-worm-win32-x64": "0.0.2"
   }
 }

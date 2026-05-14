@@ -1,6 +1,6 @@
 {
   "name": "tree-worm-linux-arm64",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "tree-worm native binary for Linux ARM64",
   "license": "MIT",
   "os": [
