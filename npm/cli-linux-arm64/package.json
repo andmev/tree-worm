@@ -1,0 +1,19 @@
+{
+  "name": "tree-worm-linux-arm64",
+  "version": "0.0.1",
+  "description": "tree-worm native binary for Linux ARM64",
+  "license": "MIT",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "tree-worm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andmev/tree-worm.git"
+  }
+}

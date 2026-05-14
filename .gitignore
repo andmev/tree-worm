@@ -1,0 +1,14 @@
+# Rust
+/target/
+Cargo.lock
+
+# tree-worm data
+.tree-worm/
+.tree-worm-data/
+
+# OS
+.DS_Store
+
+# npm platform binaries (built by CI)
+npm/cli-*/tree-worm
+npm/cli-*/tree-worm.exe

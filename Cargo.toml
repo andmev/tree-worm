@@ -1,0 +1,62 @@
+[package]
+name = "tree-worm"
+version = "0.0.1"
+edition = "2021"
+description = "A local code intelligence MCP server using Tree-sitter, SQLite FTS5, and Call Graphs"
+license = "MIT"
+
+[[bin]]
+name = "tree-worm"
+path = "src/main.rs"
+
+[dependencies]
+# MCP server
+rmcp = { version = "0.16", features = ["server", "transport-io"] }
+schemars = "1"
+
+# Tree-sitter parsing
+tree-sitter = "0.26"
+tree-sitter-javascript = "0.25"
+tree-sitter-typescript = "0.23"
+
+# Search + metadata storage
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Call graph
+petgraph = { version = "0.8", features = ["serde-1"] }
+
+# Async runtime (required by rmcp)
+tokio = { version = "1", features = ["full"] }
+
+# Parallel file parsing
+rayon = "1.10"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# File walking (.gitignore-aware)
+ignore = "0.4"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Progress reporting (stderr)
+indicatif = "0.17"
+
+# Logging (stderr)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+anyhow = "1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+opt-level = "z"
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

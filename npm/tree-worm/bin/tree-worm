@@ -1,0 +1,64 @@
+#!/usr/bin/env node
+
+const { platform, arch, env } = process;
+const { execSync } = require("child_process");
+
+function isMusl() {
+  if (platform !== "linux") return false;
+  try {
+    const out = execSync("ldd --version", {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return out.toString().includes("musl");
+  } catch (e) {
+    return ((e.stderr || "").toString()).includes("musl");
+  }
+}
+
+const PLATFORMS = {
+  win32: {
+    x64: "tree-worm-win32-x64/tree-worm.exe",
+  },
+  darwin: {
+    x64: "tree-worm-darwin-x64/tree-worm",
+    arm64: "tree-worm-darwin-arm64/tree-worm",
+  },
+  linux: {
+    x64: "tree-worm-linux-x64/tree-worm",
+    arm64: "tree-worm-linux-arm64/tree-worm",
+  },
+  "linux-musl": {
+    x64: "tree-worm-linux-x64-musl/tree-worm",
+  },
+};
+
+const key = platform === "linux" && isMusl() ? "linux-musl" : platform;
+const binPath = env.TREE_WORM_BINARY || PLATFORMS?.[key]?.[arch];
+
+if (!binPath) {
+  console.error(
+    `tree-worm: unsupported platform ${platform}-${arch}. ` +
+    `Open an issue at https://github.com/AdrianMedworTreeworm/tree-worm/issues`
+  );
+  process.exitCode = 1;
+} else {
+  let resolvedPath;
+  try {
+    resolvedPath = env.TREE_WORM_BINARY || require.resolve(binPath);
+  } catch {
+    console.error(
+      `tree-worm: could not find the native binary for ${platform}-${arch}.\n` +
+      `Make sure the platform package is installed: npm install tree-worm-${key === "linux-musl" ? "linux-x64-musl" : key + "-" + arch}\n` +
+      `Or set TREE_WORM_BINARY to the path of the tree-worm binary.`
+    );
+    process.exitCode = 1;
+    return;
+  }
+  const result = require("child_process").spawnSync(
+    resolvedPath,
+    process.argv.slice(2),
+    { shell: false, stdio: "inherit" }
+  );
+  if (result.error) throw result.error;
+  process.exitCode = result.status;
+}

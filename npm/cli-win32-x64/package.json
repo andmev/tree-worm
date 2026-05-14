@@ -1,0 +1,19 @@
+{
+  "name": "tree-worm-win32-x64",
+  "version": "0.0.1",
+  "description": "tree-worm native binary for Windows x64",
+  "license": "MIT",
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "tree-worm.exe"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andmev/tree-worm.git"
+  }
+}
