@@ -111,13 +111,6 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Verify npm token
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "Verifying npm authentication..."
-          npm whoami || { echo "::error::NPM_TOKEN is invalid or expired. Regenerate it at https://www.npmjs.com/settings/~/tokens and update the secret at https://github.com/andmev/tree-worm/settings/secrets/actions"; exit 1; }
-
       - name: Download all artifacts
         uses: actions/download-artifact@v7
         with:
@@ -151,8 +144,6 @@ jobs:
           done
 
       - name: Publish platform packages to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           for dir in npm/cli-*; do
             echo "Publishing $(basename $dir)..."
@@ -163,8 +154,6 @@ jobs:
           done
 
       - name: Publish root package to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd npm/tree-worm
           npm pkg fix
