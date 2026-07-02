@@ -149,8 +149,11 @@ jobs:
             echo "Publishing $(basename $dir)..."
             cd "$dir"
             npm pkg fix
-            npm publish --access public --provenance || echo "WARN: $(basename $dir) publish failed (may already exist)"
-            cd ../..
+            out=$(npm publish --access public --provenance 2>&1) && echo "$out" || {
+              echo "$out"
+              echo "$out" | grep -qE 'cannot publish over|already exists' && echo "WARN: $(basename $dir) already published at this version, skipping" || { echo "::error::$(basename $dir) publish failed"; exit 1; }
+            }
+            cd ../.. 
           done
 
       - name: Publish root package to npm
@@ -158,7 +161,11 @@ jobs:
           cd npm/tree-worm
           npm pkg fix
           for attempt in 1 2 3; do
-            npm publish --access public --provenance && break
+            out=$(npm publish --access public --provenance 2>&1)
+            exit_code=$?
+            echo "$out"
+            [ $exit_code -eq 0 ] && break
+            echo "$out" | grep -qE 'cannot publish over|already exists' && { echo "Already published at this version, skipping"; break; }
             if [ "$attempt" -eq 3 ]; then
               echo "::error::Failed to publish tree-worm after 3 attempts"
               exit 1
