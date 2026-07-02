@@ -157,7 +157,7 @@ jobs:
                 && echo "WARN: $(basename $dir) already at this version, skipping" \
                 || echo "WARN: $(basename $dir) publish failed (will not block release)"
             fi
-            cd ..
+            cd ../.. 
           done
 
       - name: Publish root package to npm
