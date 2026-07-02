@@ -13,7 +13,7 @@ use rayon::prelude::*;
 use rmcp::handler::server::router::Router;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::handler::server::ServerHandler;
-use rmcp::model::ServerInfo;
+use rmcp::model::{ServerCapabilities, ServerInfo};
 use rmcp::{tool, tool_router, ServiceExt};
 use schemars::JsonSchema;
 use tracing::info;
@@ -89,6 +89,7 @@ impl ServerHandler for TreeWormServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some("Code intelligence server. Indexes JS/TS and exposes search, symbols, and call graphs.".into()),
+            capabilities: ServerCapabilities::builder().enable_tools().build(),
             ..Default::default()
         }
     }
