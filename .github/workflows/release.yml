@@ -149,8 +149,10 @@ jobs:
             echo "Publishing $(basename $dir)..."
             cd "$dir"
             npm pkg fix
+            set +e
             out=$(npm publish --access public --provenance 2>&1)
             exit_code=$?
+            set -e
             echo "$out"
             if [ $exit_code -ne 0 ]; then
               echo "$out" | grep -qE 'cannot publish over|already exists' \
@@ -165,8 +167,10 @@ jobs:
           cd npm/tree-worm
           npm pkg fix
           for attempt in 1 2 3; do
+            set +e
             out=$(npm publish --access public --provenance 2>&1)
             exit_code=$?
+            set -e
             echo "$out"
             [ $exit_code -eq 0 ] && break
             echo "$out" | grep -qE 'cannot publish over|already exists' && { echo "Already published at this version, skipping"; break; }
